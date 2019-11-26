@@ -1,6 +1,6 @@
 name: built_stream
 description: This library is the runtime dependency.
-version: 1.0.0
+version: 1.0.1
 author: Dat Thanh Vo <datvt9312@gmail.com>
 homepage: https://github.com/datvt9312/flutter_bloc/built_stream
 
