@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      built_stream_generator|built_stream:
+        enabled: true
+
+builders:
+  built_stream_generator:
+    target: ":built_stream_generator"
+    import: "package:built_stream_generator/builder.dart"
+    builder_factories: ["built_stream"]
+    build_extensions: {".dart": [".built_stream_generator.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
