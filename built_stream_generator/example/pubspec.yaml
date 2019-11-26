@@ -8,13 +8,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  built_stream:
-    path: ../built_stream/
+  built_stream: ^1.0.0
 
 dev_dependencies:
   build_runner: 1.0.0
   flutter_test:
     sdk: flutter
+  # built_stream_generator: ^1.0.0
   built_stream_generator:
     path: ../built_stream_generator
+
+dependency_overrides:
+  built_stream:
+    path: ../built_stream
+  
 

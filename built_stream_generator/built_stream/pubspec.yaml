@@ -2,7 +2,7 @@ name: built_stream
 description: This library is the runtime dependency.
 version: 1.0.0
 author: Dat Thanh Vo <datvt9312@gmail.com>
-homepage: https://github.com/datvt9312/blocs/built_stream_generator
+homepage: https://github.com/datvt9312/flutter_bloc/built_stream
 
 environment:
   sdk: ">=2.0.0 <3.0.0"
