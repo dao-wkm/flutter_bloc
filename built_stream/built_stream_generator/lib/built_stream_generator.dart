@@ -94,7 +94,7 @@ class BuiltStreamGenerator extends Generator {
             ' }'
             '}');
 
-        result.writeln('class ${className}BuiltStream {'
+        result.writeln('class ${className}Stream {'
             ' ${repository} = ${repository.type}();'
             ' Stream<${className}State> process(${className}Params params) async* {'
             '   try {'
