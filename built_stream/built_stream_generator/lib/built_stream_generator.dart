@@ -59,8 +59,6 @@ class BuiltStreamGenerator extends Generator {
           }
         });
 
-        result.writeln('/// has default bloc $withDefaultBloc');
-
         result.writeln('class ${className}Params {');
         inputs.forEach((_Property property) {
           result.writeln('final $property;');
@@ -122,27 +120,17 @@ class BuiltStreamGenerator extends Generator {
 
         if (withDefaultBloc) {
           result.writeln('class ${className}Bloc {'
-              ' ${className}Stream _${className.toLowerCase()}Stream;'
-              ' SwitchSubject ${className.toLowerCase()}Subject;'
+              ' ${className}Stream _${_lowerFirst(className)}Stream;'
+              ' SwitchSubject ${_lowerFirst(className)}Subject;'
               ' ${className}Bloc() {'
-              '   _${className.toLowerCase()}Stream = ${className}Stream();'
-              '   ${className.toLowerCase()}Subject = SwitchSubject<${className}Params, ${className}State>(_${className.toLowerCase()}Stream.process);'
+              '   _${_lowerFirst(className)}Stream = ${className}Stream();'
+              '   ${_lowerFirst(className)}Subject = SwitchSubject<${className}Params, ${className}State>(_${_lowerFirst(className)}Stream.process);'
               ' }'
-              ' dispose() => ${className.toLowerCase()}Subject.dispose();'
+              ' dispose() => ${_lowerFirst(className)}Subject.dispose();'
               '}');
-          // class LoginBloc {
-          //   LoginStream _loginStream;
-          //   SwitchSubject loginSubject;
-          //   LoginBloc() {
-          //     _loginStream = LoginStream();
-          //     loginSubject = SwitchSubject<LoginParams, LoginState>(_loginStream.process);
-          //   }
-          //   dispose() => loginSubject.dispose();
-          // }
         }
       }
     }
-
     return result.toString();
   }
 }
@@ -157,3 +145,6 @@ class _Property {
     return '$type $name';
   }
 }
+
+String _lowerFirst(String word) =>
+    '${word[0].toLowerCase()}${word.substring(1)}';
