@@ -7,7 +7,7 @@ targets:
 builders:
   built_stream:
     target: ":built_stream_generator"
-    import: "package:built_stream/builder.dart"
+    import: "package:built_stream_generator/builder.dart"
     builder_factories: ["builtStream"]
     build_extensions: {".dart": [".built_stream.g.part"]}
     auto_apply: dependents

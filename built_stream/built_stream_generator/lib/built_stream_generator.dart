@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/src/builder/build_step.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:built_stream/built_stream.dart';
 import 'package:built_stream_generator/src/fields.dart';
 import 'package:built_stream_generator/src/metadata.dart';
 
@@ -16,24 +15,29 @@ class BuiltStreamGenerator extends Generator {
       if (element is ClassElement) {
         String className = _getClassName(element.displayName);
 
-        List<Property> inputs = [];
-        List<Property> outputs = [];
-        Property repository;
+        List<_Property> inputs = [];
+        List<_Property> outputs = [];
+        _Property repository;
         String action;
+        bool withDefaultBloc;
         collectFields(element).forEach((FieldElement fieldElement) {
           bool isRepository = fieldElement.metadata
               .map((annotation) => annotation.computeConstantValue())
               .any((value) {
-            dynamic field = value?.getField('action');
-            if (field != null) {
-              action = field.toStringValue();
+            dynamic actionField = value?.getField('action');
+            if (actionField != null) {
+              action = actionField.toStringValue();
+            }
+            dynamic withDefaultBlocField = value?.getField('withDefaultBloc');
+            if (withDefaultBlocField != null) {
+              withDefaultBloc = withDefaultBlocField.toBoolValue();
             }
             return value?.type?.displayName == 'Repository';
           });
 
           if (isRepository) {
             repository =
-                Property(fieldElement.type.toString(), fieldElement.name);
+                _Property(fieldElement.type.toString(), fieldElement.name);
           }
 
           bool isOutput = fieldElement.metadata.any(
@@ -41,8 +45,8 @@ class BuiltStreamGenerator extends Generator {
                   metadataToStringValue(elementAnnotation) == 'output');
 
           if (isOutput) {
-            outputs
-                .add(Property(fieldElement.type.toString(), fieldElement.name));
+            outputs.add(
+                _Property(fieldElement.type.toString(), fieldElement.name));
           }
 
           bool isInput = fieldElement.metadata.any(
@@ -50,13 +54,15 @@ class BuiltStreamGenerator extends Generator {
                   metadataToStringValue(elementAnnotation) == 'input');
 
           if (isInput) {
-            inputs
-                .add(Property(fieldElement.type.toString(), fieldElement.name));
+            inputs.add(
+                _Property(fieldElement.type.toString(), fieldElement.name));
           }
         });
 
+        result.writeln('/// has default bloc $withDefaultBloc');
+
         result.writeln('class ${className}Params {');
-        inputs.forEach((Property property) {
+        inputs.forEach((_Property property) {
           result.writeln('final $property;');
         });
         result.writeln(
@@ -64,27 +70,34 @@ class BuiltStreamGenerator extends Generator {
         result.writeln('}');
 
         result.writeln('class ${className}Results {');
-        outputs.forEach((Property property) {
+        outputs.forEach((_Property property) {
           result.writeln('final $property;');
         });
         result.writeln(
             ' const ${className}Results(${outputs.map((property) => 'this.' + property.name).join(', ')});');
         result.writeln('}');
 
-        result.writeln('class ${className}State {'
+        result.writeln('abstract class ${className}State {'
+            ' bool get isLoading;'
             ' const ${className}State();'
             '}');
 
         result.writeln('class ${className}Start extends ${className}State {'
+            ' @override'
+            ' bool get isLoading => true;'
             ' const ${className}Start();'
             '}');
 
         result.writeln('class ${className}Succeed extends ${className}State {'
+            ' @override'
+            ' bool get isLoading => false;'
             ' final ${className}Results results;'
             ' const ${className}Succeed(this.results);'
             '}');
 
         result.writeln('class ${className}Error extends ${className}State {'
+            ' @override'
+            ' bool get isLoading => false;'
             ' final dynamic error;'
             ' const ${className}Error(this.error);'
             ' @override'
@@ -106,9 +119,41 @@ class BuiltStreamGenerator extends Generator {
             '   }'
             ' }'
             '}');
+
+        if (withDefaultBloc) {
+          result.writeln('class ${className}Bloc {'
+              ' ${className}Stream _${className.toLowerCase()}Stream;'
+              ' SwitchSubject ${className.toLowerCase()}Subject;'
+              ' ${className}Bloc() {'
+              '   _${className.toLowerCase()}Stream = ${className}Stream();'
+              '   ${className.toLowerCase()}Subject = SwitchSubject<${className}Params, ${className}State>(_${className.toLowerCase()}Stream.process);'
+              ' }'
+              ' dispose() => ${className.toLowerCase()}Subject.dispose();'
+              '}');
+          // class LoginBloc {
+          //   LoginStream _loginStream;
+          //   SwitchSubject loginSubject;
+          //   LoginBloc() {
+          //     _loginStream = LoginStream();
+          //     loginSubject = SwitchSubject<LoginParams, LoginState>(_loginStream.process);
+          //   }
+          //   dispose() => loginSubject.dispose();
+          // }
+        }
       }
     }
 
     return result.toString();
+  }
+}
+
+class _Property {
+  final String type;
+  final String name;
+
+  _Property(this.type, this.name);
+  @override
+  String toString() {
+    return '$type $name';
   }
 }
