@@ -107,8 +107,9 @@ class BuiltStreamGenerator extends Generator {
             inputs.map((property) => 'this.' + property.name).join(', ');
         String optionalInputParams = '';
         if (optionalInputs.length > 0) {
-          optionalInputParams =
-              ', {${optionalInputs.map((property) => 'this.' + property.name).join(', ')}}';
+          optionalInputParams += inputParams.length > 0 ? ', ' : '';
+          optionalInputParams +=
+              '{${optionalInputs.map((property) => 'this.' + property.name).join(', ')}}';
         }
         result.writeln(
             ' const ${className}Params($inputParams$optionalInputParams);');
@@ -125,8 +126,9 @@ class BuiltStreamGenerator extends Generator {
             outputs.map((property) => 'this.' + property.name).join(', ');
         String optionalOutputParams = '';
         if (optionalOutputs.length > 0) {
-          optionalOutputParams =
-              ', {${optionalOutputs.map((property) => 'this.' + property.name).join(', ')}}';
+          optionalOutputParams += outputParams.length > 0 ? ', ' : '';
+          optionalOutputParams +=
+              '{${optionalOutputs.map((property) => 'this.' + property.name).join(', ')}}';
         }
         result.writeln(
             ' const ${className}Results($outputParams$optionalOutputParams);');

@@ -10,15 +10,15 @@ class _Login {
   @Repository('readMultiple')
   LoginRepository repository;
 
-  @input
+  @Input(optional: true)
   String username;
-  @input
+  @Input(optional: true)
   String password;
-  @input
+  @Input()
   bool onlyPassword;
 
-  @output
+  @Output(optional: true)
   dynamic userProfile;
-  @output
+  @Output(optional: true)
   Map profile;
 }

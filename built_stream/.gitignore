@@ -9,3 +9,5 @@
 **/packages
 **/pubspec.lock
 **/.packages
+
+*.g.dart

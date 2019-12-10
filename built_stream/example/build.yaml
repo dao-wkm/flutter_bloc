@@ -3,4 +3,4 @@ targets:
     builders:
       built_stream_generator|built_stream:
         generate_for:
-          - lib/build/**.dart
+          - lib/built_stream/**.dart
