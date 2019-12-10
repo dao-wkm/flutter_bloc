@@ -16,63 +16,120 @@ class BuiltStreamGenerator extends Generator {
         String className = _getClassName(element.displayName);
 
         List<_Property> inputs = [];
+        List<_Property> optionalInputs = [];
         List<_Property> outputs = [];
+        List<_Property> optionalOutputs = [];
         _Property repository;
         String action;
         bool withDefaultBloc;
         collectFields(element).forEach((FieldElement fieldElement) {
-          bool isRepository = fieldElement.metadata
+          // bool isRepository = false;
+          fieldElement.metadata
               .map((annotation) => annotation.computeConstantValue())
-              .any((value) {
-            dynamic actionField = value?.getField('action');
-            if (actionField != null) {
-              action = actionField.toStringValue();
+              .forEach((value) {
+            if (value?.type?.displayName == 'Repository') {
+              dynamic actionField = value?.getField('action');
+              if (actionField != null) {
+                action = actionField.toStringValue();
+              }
+              dynamic withDefaultBlocField = value?.getField('withDefaultBloc');
+              if (withDefaultBlocField != null) {
+                withDefaultBloc = withDefaultBlocField.toBoolValue();
+              }
+              // isRepository = true;
+              repository =
+                  _Property(fieldElement.type.toString(), fieldElement.name);
             }
-            dynamic withDefaultBlocField = value?.getField('withDefaultBloc');
-            if (withDefaultBlocField != null) {
-              withDefaultBloc = withDefaultBlocField.toBoolValue();
+
+            if (value?.type?.displayName == 'Input') {
+              dynamic optionalField = value?.getField('optional');
+              bool optional;
+              if (optionalField != null) {
+                optional = optionalField.toBoolValue();
+              }
+              if (optional) {
+                optionalInputs.add(
+                    _Property(fieldElement.type.toString(), fieldElement.name));
+              } else {
+                inputs.add(
+                    _Property(fieldElement.type.toString(), fieldElement.name));
+              }
             }
-            return value?.type?.displayName == 'Repository';
+
+            if (value?.type?.displayName == 'Output') {
+              dynamic optionalField = value?.getField('optional');
+              bool optional;
+              if (optionalField != null) {
+                optional = optionalField.toBoolValue();
+              }
+              if (optional) {
+                optionalOutputs.add(
+                    _Property(fieldElement.type.toString(), fieldElement.name));
+              } else {
+                outputs.add(
+                    _Property(fieldElement.type.toString(), fieldElement.name));
+              }
+            }
           });
 
-          if (isRepository) {
-            repository =
-                _Property(fieldElement.type.toString(), fieldElement.name);
-          }
+          // if (isRepository) {
+          //   repository =
+          //       _Property(fieldElement.type.toString(), fieldElement.name);
+          // }
 
-          bool isOutput = fieldElement.metadata.any(
-              (ElementAnnotation elementAnnotation) =>
-                  metadataToStringValue(elementAnnotation) == 'output');
+          // bool isOutput = fieldElement.metadata.any(
+          //     (ElementAnnotation elementAnnotation) =>
+          //         metadataToStringValue(elementAnnotation) == 'output');
 
-          if (isOutput) {
-            outputs.add(
-                _Property(fieldElement.type.toString(), fieldElement.name));
-          }
+          // if (isOutput) {
+          //   outputs.add(
+          //       _Property(fieldElement.type.toString(), fieldElement.name));
+          // }
 
-          bool isInput = fieldElement.metadata.any(
-              (ElementAnnotation elementAnnotation) =>
-                  metadataToStringValue(elementAnnotation) == 'input');
+          // bool isInput = fieldElement.metadata.any(
+          //     (ElementAnnotation elementAnnotation) =>
+          //         metadataToStringValue(elementAnnotation) == 'input');
 
-          if (isInput) {
-            inputs.add(
-                _Property(fieldElement.type.toString(), fieldElement.name));
-          }
+          // if (isInput) {
+          //   inputs.add(
+          //       _Property(fieldElement.type.toString(), fieldElement.name));
+          // }
         });
 
         result.writeln('class ${className}Params {');
         inputs.forEach((_Property property) {
           result.writeln('final $property;');
         });
+        optionalInputs.forEach((_Property property) {
+          result.writeln('final $property;');
+        });
+        String inputParams =
+            inputs.map((property) => 'this.' + property.name).join(', ');
+        String optionalInputParams = '';
+        if (optionalInputs.length > 0) {
+          optionalInputParams =
+              ', {${optionalInputs.map((property) => 'this.' + property.name).join(', ')}}';
+        }
         result.writeln(
-            ' const ${className}Params(${inputs.map((property) => 'this.' + property.name).join(', ')});');
+            ' const ${className}Params($inputParams$optionalInputParams);');
         result.writeln('}');
 
         result.writeln('class ${className}Results {');
         outputs.forEach((_Property property) {
           result.writeln('final $property;');
         });
+        optionalOutputs.forEach((_Property property) {
+          result.writeln('final $property;');
+        });
+        String outputParams =
+            outputs.map((property) => 'this.' + property.name).join(', ');
+        String optionalOutputParams = '';
+        if (optionalOutputs.length > 0) {
+          optionalOutputParams =
+              ', {${optionalOutputs.map((property) => 'this.' + property.name).join(', ')}}';
+        }
         result.writeln(
-            ' const ${className}Results(${outputs.map((property) => 'this.' + property.name).join(', ')});');
+            ' const ${className}Results($outputParams$optionalOutputParams);');
         result.writeln('}');
 
         result.writeln('abstract class ${className}State {'
