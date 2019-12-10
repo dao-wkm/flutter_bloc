@@ -121,7 +121,7 @@ class BuiltStreamGenerator extends Generator {
         if (withDefaultBloc) {
           result.writeln('class ${className}Bloc {'
               ' ${className}Stream _${_lowerFirst(className)}Stream;'
-              ' SwitchSubject ${_lowerFirst(className)}Subject;'
+              ' SwitchSubject<${className}Params, ${className}State> ${_lowerFirst(className)}Subject;'
               ' ${className}Bloc() {'
               '   _${_lowerFirst(className)}Stream = ${className}Stream();'
               '   ${_lowerFirst(className)}Subject = SwitchSubject<${className}Params, ${className}State>(_${_lowerFirst(className)}Stream.process);'
