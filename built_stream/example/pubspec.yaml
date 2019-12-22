@@ -14,7 +14,7 @@ dev_dependencies:
   build_runner: 1.7.2
   flutter_test:
     sdk: flutter
-  customized_streams: 1.0.8
+  customized_streams: 1.0.9
   built_stream_generator: ^1.0.9
 
 
